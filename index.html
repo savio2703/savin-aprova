@@ -31,6 +31,10 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 .vbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;padding:12px 14px;border-radius:14px;border:1.5px solid rgba(255,122,98,.5);background:linear-gradient(135deg,rgba(255,138,92,.16),rgba(155,123,255,.14));color:var(--tx);text-align:left;cursor:pointer}
 .vbtn .pl{flex:0 0 40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--g);color:#fff;font-size:16px}.vbtn b{display:block;font-size:15px}.vbtn .sub{display:block;font-size:12.5px}
 .vwrap{margin-top:14px;border-radius:14px;overflow:hidden;background:#000}.vwrap video{width:100%;display:block;aspect-ratio:16/9}
+
+.alt .corta{flex:0 0 34px;height:34px;margin:-4px -6px -4px 0;border-radius:10px;display:grid;place-items:center;font-size:17px;color:var(--mut);opacity:.7;cursor:pointer}
+.alt .corta:hover{opacity:1;background:rgba(255,255,255,.08)}.alt.show .corta{display:none}
+.alt.cut{opacity:.45}.alt.cut .tx{text-decoration:line-through;text-decoration-thickness:2px}.alt.cut .corta{opacity:1;color:var(--err)}
 @media(max-width:560px){.hero h1{font-size:23px;max-width:78%}.hero p{max-width:100%}.hero .selo{width:130px;height:130px;right:-30px;top:-30px}}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wrap{max-width:980px;margin:0 auto;padding:22px 18px 90px}
@@ -162,13 +166,13 @@ function abreSim(k){const x=SIMS[k];SIMA=k;
   <div class="dl" style="margin-bottom:6px">${dlink('s'+x.n+'p','Simulado '+x.n+' - Prova')}${dlink('s'+x.n+'g','Simulado '+x.n+' - Gabarito comentado')}</div>`;
   x.casos.forEach((c,ci)=>{h+=`<div class="caso"><h3>${esc(c.titulo)}</h3>${c.texto.map(([t,v])=>`<p>${t?`<b>${esc(t)}:</b> `:''}${esc(v)}</p>`).join('')}${vbtn(x,'c'+(ci+1),'Caso explicado em vídeo')}</div>`;
     c.questoes.forEach(q=>{h+=`<div class="card qcard q" id="q${q.n}"><span class="qtipo" style="background:${q.tipo==='obj'?'#60a5fa22;color:#60a5fa':'#a78bfa22;color:#a78bfa'}">${q.tipo==='obj'?'Questão '+String(q.n).padStart(2,'0'):'Discursiva '+String(q.n).padStart(2,'0')}</span>${q.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<div class="enun">${esc(q.enunciado)}</div>`;
-      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm ${a.correta?'c':''}"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(String(a.comentario||'').replace(/^\s*(Correta|Errada|Incorreta)[.:,]?\s*/i,''))}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span></button>`).join('')}</div>`}
+      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm ${a.correta?'c':''}"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(String(a.comentario||'').replace(/^\s*(Correta|Errada|Incorreta)[.:,]?\s*/i,''))}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span><span class="corta" title="Cortar alternativa" onclick="event.stopPropagation();corta(this)">✂</span></button>`).join('')}</div>`}
       else{h+=q.itens.map((it,j)=>`<div style="margin:10px 0"><div><b>${it.letra?it.letra+') ':''}</b>${esc(it.texto)} ${it.pontos?`<span class="sub">(${it.pontos})</span>`:''}</div><div id="r${q.n}_${j}" class="hide resp" style="margin-top:8px">${esc(it.resposta)}${it.nota?`<span class="nota">${esc(it.nota)}</span>`:''}</div></div>`).join('')+`<div class="foot"><span></span><button class="btn" onclick="this.remove();document.querySelectorAll('[id^=r${q.n}_],#vb${q.n}').forEach(e=>e.classList.remove('hide'))">Mostrar resposta-modelo</button></div>`}
       h+=`<div class="vbox hide" id="vb${q.n}">${vbtn(x,'q'+q.n,'Gabarito comentado em vídeo')}</div></div>`})});
   h+=`<div class="row" style="justify-content:center;margin:20px 0"><button class="btn" onclick="simulados()">Voltar aos simulados</button></div></div>`;
   app.innerHTML=h;const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');Object.entries(sv).forEach(([n,j])=>marcaSim(x,+n,j));placar();scrollTo(0,0)}
-function marcaSim(x,n,j){const vb=$('#vb'+n);if(vb)vb.classList.remove('hide');const q=achaQ(x,n);const c=q.alts.findIndex(a=>a.correta);q.alts.forEach((_,k)=>{const b=$(`#q${n}a${k}`);if(!b)return;b.disabled=true;b.classList.add('show');if(k===c)b.classList.add('ok');else if(k===j)b.classList.add('err')});return j===c}
-function respSim(n,j){const x=SIMS[SIMA];const ok=marcaSim(x,n,j);const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');st[n]=ok;localStorage.setItem('sim_'+x.n,JSON.stringify(st));const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');sv[n]=j;localStorage.setItem('simr_'+x.n,JSON.stringify(sv));placar()}
+function marcaSim(x,n,j){const vb=$('#vb'+n);if(vb)vb.classList.remove('hide');const q=achaQ(x,n);const c=q.alts.findIndex(a=>a.correta);q.alts.forEach((_,k)=>{const b=$(`#q${n}a${k}`);if(!b)return;b.disabled=true;b.classList.remove('cut');b.classList.add('show');if(k===c)b.classList.add('ok');else if(k===j)b.classList.add('err')});return j===c}
+function respSim(n,j){const bj=$(`#q${n}a${j}`);if(bj&&bj.classList.contains('cut')){bj.classList.remove('cut');return}const x=SIMS[SIMA];const ok=marcaSim(x,n,j);const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');st[n]=ok;localStorage.setItem('sim_'+x.n,JSON.stringify(st));const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');sv[n]=j;localStorage.setItem('simr_'+x.n,JSON.stringify(sv));placar()}
 function placar(){const x=SIMS[SIMA];const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');const t=x.casos.flatMap(c=>c.questoes).filter(q=>q.tipo==='obj').length;const f=Object.keys(st).length,o=Object.values(st).filter(v=>v).length;const e=$('#placar');if(e)e.textContent=`Objetivas: ${f}/${t} respondidas · ${o} certas${f?` (${Math.round(o/f*100)}%)`:''}`}
 
 
@@ -199,7 +203,7 @@ function iniciar(lista,titulo,key){if(!lista.length)return;R={lista,titulo,key,i
 function mostra(){
   const x=R.lista[R.i],q=x.q,[tn,tc]=TIPO[q.t]||TIPO.mc,d=DATA[x.m];
   const alts=q.t==='ed'?`<textarea id="ta" placeholder="Escreva (ou pense) sua resposta e depois revele a resposta-modelo..."></textarea><div class="foot"><span></span><button class="btn pri" onclick="revela()">Mostrar resposta</button></div>`:
-   `<div class="alts">${q.a.map((a,j)=>`<button class="alt" id="a${j}" onclick="responde(${j})"><span class="l">${q.t==='vf'?(j?'F':'V'):L[j]}</span><span class="tx">${esc(a)}${q.k&&q.k[j]?cmt(q.k[j],j===q.c):''}</span></button>`).join('')}</div>`;
+   `<div class="alts">${q.a.map((a,j)=>`<button class="alt" id="a${j}" onclick="responde(${j})"><span class="l">${q.t==='vf'?(j?'F':'V'):L[j]}</span><span class="tx">${esc(a)}${q.k&&q.k[j]?cmt(q.k[j],j===q.c):''}</span><span class="corta" title="Cortar alternativa" onclick="event.stopPropagation();corta(this)">✂</span></button>`).join('')}</div>`;
   app.innerHTML=head(esc(R.titulo),'sair()')+
   `<div class="qtop"><span class="sub">Questão ${R.i+1} de ${R.lista.length}</span><span class="chip">${esc(d.nome)} · Aula ${x.a}</span></div><div class="prog"><i style="width:${R.i/R.lista.length*100}%"></i></div>
   <div class="card qcard"><span class="qtipo" style="background:${tc}22;color:${tc}">${tn}${q.t==='ed'&&q.d?' · '+q.d:''}</span>
@@ -207,9 +211,10 @@ function mostra(){
   <div class="enun">${esc(q.e)}</div>${alts}<div id="exp"></div></div>`;
 }
 function exp(q,x){return `<div class="exp"><h4>${q.t==='ed'?'Resposta-modelo':'Para guardar'}</h4>${q.t==='ed'?`<div class="resp">${esc(q.r)}</div>`:''}${q.x?`<p style="margin-top:${q.t==='ed'?8:0}px">💡 ${esc(q.x)}</p>`:''}<div class="src">📍 Aula ${x.a} · ${esc(x.aula)}${q.g?' · '+esc(q.g):''}</div></div>`}
-function responde(j){
+function corta(e){e.parentNode.classList.toggle('cut')}
+function responde(j){if($('#a'+j)&&$('#a'+j).classList.contains('cut')){$('#a'+j).classList.remove('cut');return}
   const x=R.lista[R.i],q=x.q,ok=j===q.c;
-  q.a.forEach((_,k)=>{const b=$('#a'+k);b.disabled=true;b.classList.add('show');if(k===q.c)b.classList.add('ok');else if(k===j)b.classList.add('err')});
+  q.a.forEach((_,k)=>{const b=$('#a'+k);b.disabled=true;b.classList.remove('cut');b.classList.add('show');if(k===q.c)b.classList.add('ok');else if(k===j)b.classList.add('err')});
   registra(x,ok);$('#exp').innerHTML=exp(q,x)+prox();
 }
 function revela(){const x=R.lista[R.i],q=x.q;$('.foot').remove();$('#exp').innerHTML=exp(q,x)+`<div class="foot"><span class="sub">Como foi sua resposta?</span><div class="row"><button class="btn" onclick="auto(false)">❌ Errei</button><button class="btn" onclick="auto(true)" style="border-color:var(--ok)">✅ Acertei</button></div></div>`}
