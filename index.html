@@ -17,6 +17,16 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 .hero h1{font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-.6px;max-width:72%}
 .hero h1 em{font-style:normal;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{color:#d5cde4;margin-top:8px;max-width:68%;font-size:14.5px}
+
+.aud{margin-top:18px;text-align:left}.aud h3{font-size:18px;font-weight:800;margin:0 0 4px}
+.aud .mats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 14px}
+.aud .mats div{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:14px;padding:10px;text-align:center}
+.aud .mats b{display:block;font-size:20px}.aud .mats span{font-size:12px;color:var(--mut)}
+.aud .as{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin:8px 0}
+.aud .as .t{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.aud .as .t b{font-size:15px}
+.aud .as .pc{font-weight:800;white-space:nowrap}.aud .as .tm{font-size:12.5px;color:var(--mut);margin:6px 0 8px}
+.aud .as .btn{padding:8px 12px;font-size:13.5px}.aud .top{border-color:rgba(248,113,113,.55);background:rgba(248,113,113,.08)}
+.aud .selo-top{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;color:#fca5a5;margin-bottom:4px}
 @media(max-width:560px){.hero h1{font-size:23px;max-width:78%}.hero p{max-width:100%}.hero .selo{width:130px;height:130px;right:-30px;top:-30px}}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wrap{max-width:980px;margin:0 auto;padding:22px 18px 90px}
@@ -120,11 +130,11 @@ function head(t,back){return `<div class="topo">${MARCA}</div><header>${back?`<b
 
 function home(){
   const all=Object.keys(DATA).flatMap(todas); const st=stats(all); const erros=all.filter(x=>S[qid(x.m,x.a,x.i)]&&!S[qid(x.m,x.a,x.i)].ok);
-  app.innerHTML=`<div class="topo">${MARCA}</div><div class="hero">${SELO}<h1>Treine para a <em>PR2</em> até saber por que cada alternativa está errada.</h1><p>${st.tot} questões de Anatomia, Histologia/Embriologia e Fisiologia, com gabarito comentado em cada alternativa, e ${SIMS.length} simulados no formato da prova.</p></div>`+
+  app.innerHTML=`<div class="topo">${MARCA}</div><div class="hero">${SELO}<h1>Treine para a <em>PR2</em> até saber por que cada alternativa está errada.</h1><p>${st.tot} questões de Anatomia, Histologia/Embriologia e Fisiologia, com gabarito comentado em cada alternativa, e ${SIMS.length} simulados no formato da prova.</p></div><button class="btn pri" style="width:100%;margin:0 0 16px;padding:14px;font-size:15.5px" onclick="misturado()">🎯 Quiz misturado · 30 questões + auditoria dos erros</button>`+
   `<div class="stat"><div class="card"><b>${st.f}</b><span>respondidas</span></div><div class="card"><b style="color:var(--ok)">${st.p}%</b><span>de acerto</span></div><div class="card"><b style="color:var(--err)">${erros.length}</b><span>para revisar</span></div></div>
   <div class="grid">${Object.entries(DATA).map(([m,d])=>{const s=stats(todas(m));return `<button class="card mat" style="--glow:${d.cor}33" onclick="materia('${m}')"><span class="ico">${({anato:'🫀',histo:'🔬',fisio:'⚡'})[m]}</span><span class="tag" style="background:${d.cor}"></span><span class="sub">${d.aulas.length} aulas · ${s.tot} questões</span><h2>${d.nome}</h2><div class="row"><span class="chip">${s.f}/${s.tot} feitas</span><span class="chip" style="color:${s.f?(s.p>=70?'var(--ok)':'var(--warn)'):'var(--mut)'}">${s.f?s.p+'% de acerto':'não começado'}</span></div>${bar(s.f/s.tot*100,d.cor)}</button>`}).join('')}</div>
   <button class="card mat" style="width:100%;margin-top:14px;--glow:#60a5fa33" onclick="simulados()"><span class="ico">📝</span><span class="tag" style="background:#60a5fa"></span><span class="sub">${SIMS.length} simulados · prova + gabarito comentado em PDF</span><h2>Simulados no formato da PR2</h2><div class="row"><span class="chip">casos clínicos</span><span class="chip">alternativas de Histo, Embrio, Fisio e Anato</span></div></button>
-  <div class="modes" style="margin-top:22px"><button class="mode" onclick="iniciar(shuffle(${'Object.keys(DATA).flatMap(todas)'}).slice(0,40),'Simulado geral')"><b>🎯 Simulado geral</b><span>40 questões sorteadas das 3 matérias</span></button>
+  <div class="modes" style="margin-top:22px"><button class="mode" onclick="misturado()"><b>🎯 Quiz misturado</b><span>30 questões aleatórias das 3 matérias + auditoria do que você mais errou</span></button>
   <button class="mode" ${erros.length?'':'disabled style="opacity:.45"'} onclick="revErros()"><b>🔁 Revisar meus erros</b><span>${erros.length} questões que você errou</span></button>
   <button class="mode" onclick="if(confirm('Apagar todo o progresso?')){S={};save();home()}"><b>🧹 Zerar progresso</b><span>começar do zero</span></button></div>`;
 }
@@ -190,8 +200,28 @@ function fim(){
   const msg=p>=85?'Excelente! Domínio muito bom.':p>=70?'Bom resultado. Revise os erros para fechar.':p>=50?'No caminho. Vale rever as aulas dos erros.':'Hora de reassistir as aulas e tentar de novo.';
   app.innerHTML=head(esc(R.titulo),'home()')+`<div class="card res"><div class="ring" style="background:conic-gradient(${cor} ${p*3.6}deg,rgba(255,255,255,.08) 0)"><div>${p}%</div></div><h2>${ok} de ${t} certas</h2><p class="sub" style="margin-top:6px">${msg}</p>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn" onclick="home()">Início</button>${t-ok?'<button class="btn pri" onclick="refazErros()">Refazer as erradas</button>':''}</div>
-  <div class="list">${R.res.map((r,k)=>`<div class="li" onclick="this.querySelector('.det').classList.toggle('hide')"><span class="d" style="background:${r.ok?'var(--ok)':'var(--err)'}"></span><div><div>${k+1}. ${esc(r.x.q.e.slice(0,140))}${r.x.q.e.length>140?'…':''}</div><div class="det hide" style="margin-top:6px">${r.x.q.t!=='ed'?`<b style="color:var(--ok)">${L[r.x.q.c]}) ${esc(r.x.q.a[r.x.q.c])}</b><br>${(r.x.q.k||[]).map((c,j)=>`<span class="sub">${L[j]}: ${esc(c)}</span>`).join('<br>')}<br>`:''}<span class="sub">${esc(r.x.q.x||r.x.q.r||'')}</span></div></div></div>`).join('')}</div></div>`;scrollTo(0,0);
+  ${auditoria()}<h3 style="font-size:16px;margin:20px 0 0;text-align:left">Questão por questão</h3><div class="list">${R.res.map((r,k)=>`<div class="li" onclick="this.querySelector('.det').classList.toggle('hide')"><span class="d" style="background:${r.ok?'var(--ok)':'var(--err)'}"></span><div><div>${k+1}. ${esc(r.x.q.e.slice(0,140))}${r.x.q.e.length>140?'…':''}</div><div class="det hide" style="margin-top:6px">${r.x.q.t!=='ed'?`<b style="color:var(--ok)">${L[r.x.q.c]}) ${esc(r.x.q.a[r.x.q.c])}</b><br>${(r.x.q.k||[]).map((c,j)=>`<span class="sub">${L[j]}: ${esc(c)}</span>`).join('<br>')}<br>`:''}<span class="sub">${esc(r.x.q.x||r.x.q.r||'')}</span></div></div></div>`).join('')}</div></div>`;scrollTo(0,0);
 }
+
+function misturado(){const ms=Object.keys(DATA),por=Math.floor(30/ms.length);let l=[];ms.forEach(m=>{l=l.concat(shuffle(todas(m).filter(x=>x.q.t!=='ed')).slice(0,por))});
+  const resto=shuffle(Object.keys(DATA).flatMap(todas).filter(x=>x.q.t!=='ed'&&!l.includes(x)));l=l.concat(resto.slice(0,30-l.length));iniciar(shuffle(l),'Quiz misturado')}
+function treino(m,a){const l=todas(m).filter(x=>x.a===a&&x.q.t!=='ed');const st=x=>{const v=S[qid(x.m,x.a,x.i)];return v?(v.ok?2:0):1};
+  return shuffle(l).sort((p,q)=>st(p)-st(q)).slice(0,30)}
+function treinaAula(m,a){const au=DATA[m].aulas.find(z=>z.n===a);iniciar(shuffle(treino(m,a)),'Treino · '+au.nome)}
+var AUD=[];
+function treinaFraco(){let l=[];const tot=AUD.reduce((s,g)=>s+g.e,0);AUD.filter(g=>g.e).forEach(g=>{l=l.concat(treino(g.m,g.a).slice(0,Math.max(3,Math.round(30*g.e/tot))))});
+  iniciar(shuffle(l).slice(0,30),'Quiz do que preciso estudar')}
+function auditoria(){
+  const G={};R.res.forEach(r=>{const x=r.x,k=x.m+'.'+x.a;(G[k]=G[k]||{m:x.m,a:x.a,nome:x.aula,t:0,e:0,temas:[]});G[k].t++;if(!r.ok){G[k].e++;if(x.q.g&&!G[k].temas.includes(x.q.g))G[k].temas.push(x.q.g)}});
+  AUD=Object.values(G).sort((p,q)=>q.e-p.e||(q.e/q.t)-(p.e/p.t));if(AUD.length<2)return '';
+  const M={};R.res.forEach(r=>{const m=r.x.m;(M[m]=M[m]||{t:0,o:0});M[m].t++;if(r.ok)M[m].o++});
+  const err=AUD.filter(g=>g.e);
+  return `<div class="aud"><h3>🔎 Auditoria do seu quiz</h3><p class="sub">${err.length?'Onde você mais errou, do pior para o melhor. Toque em treinar para fazer um quiz só daquele assunto.':'Você não errou nenhuma. Domínio em todos os assuntos que caíram.'}</p>
+  <div class="mats">${Object.entries(M).map(([m,v])=>{const p=Math.round(v.o/v.t*100);return `<div><b style="color:${p>=70?'var(--ok)':p>=50?'var(--warn)':'var(--err)'}">${p}%</b><span>${esc(DATA[m].nome.split(' ')[0])} · ${v.o}/${v.t}</span></div>`}).join('')}</div>
+  ${err.length>1?`<button class="btn pri" style="width:100%;margin-bottom:6px" onclick="treinaFraco()">🎯 Quiz do que eu preciso estudar (30 questões dos assuntos que errei)</button>`:''}
+  ${AUD.map((g,k)=>{const p=Math.round((g.t-g.e)/g.t*100),d=DATA[g.m];return `<div class="as ${k===0&&g.e?'top':''}">${k===0&&g.e?'<span class="selo-top">MAIS ERROU</span>':''}<div class="t"><b><span style="color:${d.cor}">●</span> ${esc(g.nome)}</b><span class="pc" style="color:${g.e?(p>=50?'var(--warn)':'var(--err)'):'var(--ok)'}">${g.e?`errou ${g.e} de ${g.t}`:`${g.t}/${g.t} certas`}</span></div>
+   <div class="tm">${esc(d.nome)} · Aula ${g.a}${g.temas.length?' · errou em: '+g.temas.map(esc).join(', '):''}</div>${bar(p,g.e?(p>=50?'var(--warn)':'var(--err)'):'var(--ok)')}
+   ${g.e?`<div style="margin-top:10px"><button class="btn" onclick="treinaAula('${g.m}',${g.a})">Treinar este assunto →</button></div>`:''}</div>`}).join('')}</div>`}
 function refazErros(){iniciar(shuffle(R.res.filter(r=>!r.ok).map(r=>r.x)),'Refazendo erradas')}
 function zoom(src){const z=document.createElement('div');z.className='zoom';z.innerHTML=`<img src="${src}">`;z.onclick=()=>z.remove();document.body.appendChild(z)}
 document.addEventListener('keydown',e=>{if(!R||!$('.alts'))return;const k=e.key.toUpperCase();const j=L.indexOf(k);if(j>=0&&$('#a'+j)&&!$('#a'+j).disabled)responde(j);if(e.key==='Enter'&&$('.btn.pri'))$('.btn.pri').click()});
