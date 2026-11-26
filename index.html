@@ -108,7 +108,7 @@ textarea{width:100%;min-height:110px;padding:14px;border-radius:14px;background:
 @media(max-width:560px){.enun{font-size:16.5px}.qcard{padding:16px}.wrap{padding:16px 12px 90px}header h1{font-size:19px}}
 </style></head><body><div class="wrap" id="app"><div style="min-height:80vh;display:grid;place-items:center;text-align:center;color:#a59cba;font:600 15px system-ui,sans-serif"><div><div style="width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#ff8a5c,#f0567a 55%,#9b7bff);animation:gira 1.2s linear infinite"></div>Savin Aprova<br><span style="font-weight:400;font-size:13px">carregando o quiz…</span></div></div></div>
 <script>window.onerror=function(m,u,l){var a=document.getElementById('app');if(a&&!window.__ok)a.innerHTML='<div style="padding:24px;color:#f5f1fa;font:15px sans-serif">Não abriu neste navegador.<br><br><small style="color:#a59cba">Erro: '+String(m).replace(/</g,'&lt;')+' (linha '+l+')</small><br><br><button onclick="try{localStorage.clear()}catch(e){};location.reload()" style="padding:10px 14px;border-radius:10px;border:0;background:#f0567a;color:#fff">Limpar e tentar de novo</button></div>'};</script>
-<script src="dados.js?v=ad31c171"></script><script>
+<script src="dados.js?v=484f2136"></script><script>
 
 const TIPO={mc:['Múltipla escolha','#60a5fa'],vf:['Verdadeiro ou falso','#fbbf24'],img:['Figura / lâmina','#f472b6'],caso:['Caso clínico','#34d399'],ed:['Estudo dirigido','#a78bfa']};
 const L='ABCDEFGH';
@@ -140,7 +140,7 @@ function home(){
   <button class="mode" onclick="if(confirm('Apagar todo o progresso?')){S={};save();home()}"><b>🧹 Zerar progresso</b><span>começar do zero</span></button></div>`;
 }
 const AREA=a=>{const x=(a||'').toLowerCase();return x.startsWith('hist')?'a-hist':x.startsWith('emb')?'a-emb':x.startsWith('fis')?'a-fis':x.startsWith('bio')?'a-bio':x.startsWith('neuro')?'a-neu':'a-ana'};
-function dlink(k,nome){return PDFS[k]?`<a download="${esc(nome)}.pdf" href="${PDFS[k].startsWith('pdf/')?encodeURI(PDFS[k]):'data:application/pdf;base64,'+PDFS[k]}">⬇ Baixar ${esc(nome.split(' - ').slice(1).join(' - '))} (PDF)</a>`:''}
+function dlink(k,nome){return PDFS[k]?(PDFS[k].startsWith('pdf/')?`<a href="${PDFS[k]}" target="_blank" rel="noopener">`:`<a download="${esc(nome)}.pdf" href="data:application/pdf;base64,${PDFS[k]}">`)+`⬇ Baixar ${esc(nome.split(' - ').slice(1).join(' - '))} (PDF)</a>`:''}
 function simulados(){
   app.innerHTML=head('Simulados <span>no formato da PR2</span>','home()')+`<p class="sub" style="margin:-12px 0 16px">Casos clínicos com alternativas de Histologia, Embriologia, Fisiologia/Bioquímica e Anatomia. Faça online ou baixe a prova e o gabarito comentado em PDF.</p>`+
   `<div class="grid" style="grid-template-columns:1fr">${SIMS.map((x,k)=>{const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');const f=Object.keys(st).length,o=Object.values(st).filter(v=>v).length;
