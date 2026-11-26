@@ -73,7 +73,8 @@ button.card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.2)}
 .alt.ok{border-color:var(--ok);background:rgba(52,211,153,.12)}.alt.ok .l{background:var(--ok);color:#06281b}
 .alt.err{border-color:var(--err);background:rgba(248,113,113,.12)}.alt.err .l{background:var(--err);color:#300}
 .alt:disabled{cursor:default}
-.alt .cm{display:none;margin-top:6px;font-size:14px;color:#cfc7de;line-height:1.45}.alt.show .cm{display:block}.alt.ok .cm{color:#bff3dc}.alt.err .cm{color:#ffd0d0}
+.alt .cm{display:none;margin-top:10px;font-size:15px;color:#f3eefa;line-height:1.5;padding:10px 12px;border-radius:10px;background:rgba(248,113,113,.10);border-left:4px solid var(--err)}.alt.show .cm{display:block}.alt .cm.c{background:rgba(52,211,153,.12);border-left-color:var(--ok)}
+.cm .rot{display:block;font-size:11.5px;font-weight:800;letter-spacing:1.2px;margin-bottom:3px;color:#fca5a5}.cm.c .rot{color:#6ee7b7}.cm mark{background:none;color:#ffd36b;font-weight:800}
 .alt .tx{flex:1}
 .exp{margin-top:16px;padding:16px;border-radius:14px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);animation:in .25s}
 .exp h4{font-size:14px;margin-bottom:6px}.exp p{color:#ddd6ee;font-size:15px}
@@ -107,7 +108,7 @@ textarea{width:100%;min-height:110px;padding:14px;border-radius:14px;background:
 @media(max-width:560px){.enun{font-size:16.5px}.qcard{padding:16px}.wrap{padding:16px 12px 90px}header h1{font-size:19px}}
 </style></head><body><div class="wrap" id="app"><div style="min-height:80vh;display:grid;place-items:center;text-align:center;color:#a59cba;font:600 15px system-ui,sans-serif"><div><div style="width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#ff8a5c,#f0567a 55%,#9b7bff);animation:gira 1.2s linear infinite"></div>Savin Aprova<br><span style="font-weight:400;font-size:13px">carregando o quiz…</span></div></div></div>
 <script>window.onerror=function(m,u,l){var a=document.getElementById('app');if(a&&!window.__ok)a.innerHTML='<div style="padding:24px;color:#f5f1fa;font:15px sans-serif">Não abriu neste navegador.<br><br><small style="color:#a59cba">Erro: '+String(m).replace(/</g,'&lt;')+' (linha '+l+')</small><br><br><button onclick="try{localStorage.clear()}catch(e){};location.reload()" style="padding:10px 14px;border-radius:10px;border:0;background:#f0567a;color:#fff">Limpar e tentar de novo</button></div>'};</script>
-<script src="dados.js?v=7fd6d522"></script><script>
+<script src="dados.js?v=e67c4aeb"></script><script>
 
 const TIPO={mc:['Múltipla escolha','#60a5fa'],vf:['Verdadeiro ou falso','#fbbf24'],img:['Figura / lâmina','#f472b6'],caso:['Caso clínico','#34d399'],ed:['Estudo dirigido','#a78bfa']};
 const L='ABCDEFGH';
@@ -134,7 +135,7 @@ function home(){
   `<div class="stat"><div class="card"><b>${st.f}</b><span>respondidas</span></div><div class="card"><b style="color:var(--ok)">${st.p}%</b><span>de acerto</span></div><div class="card"><b style="color:var(--err)">${erros.length}</b><span>para revisar</span></div></div>
   <div class="grid">${Object.entries(DATA).map(([m,d])=>{const s=stats(todas(m));return `<button class="card mat" style="--glow:${d.cor}33" onclick="materia('${m}')"><span class="ico">${({anato:'🫀',histo:'🔬',fisio:'⚡'})[m]}</span><span class="tag" style="background:${d.cor}"></span><span class="sub">${d.aulas.length} aulas · ${s.tot} questões</span><h2>${d.nome}</h2><div class="row"><span class="chip">${s.f}/${s.tot} feitas</span><span class="chip" style="color:${s.f?(s.p>=70?'var(--ok)':'var(--warn)'):'var(--mut)'}">${s.f?s.p+'% de acerto':'não começado'}</span></div>${bar(s.f/s.tot*100,d.cor)}</button>`}).join('')}</div>
   <button class="card mat" style="width:100%;margin-top:14px;--glow:#60a5fa33" onclick="simulados()"><span class="ico">📝</span><span class="tag" style="background:#60a5fa"></span><span class="sub">${SIMS.length} simulados · prova + gabarito comentado em PDF</span><h2>Simulados no formato da PR2</h2><div class="row"><span class="chip">casos clínicos</span><span class="chip">alternativas de Histo, Embrio, Fisio e Anato</span></div></button>
-  <div class="modes" style="margin-top:22px"><button class="mode" onclick="misturado()"><b>🎯 Quiz misturado</b><span>30 questões aleatórias das 3 matérias + auditoria do que você mais errou</span></button>
+  <div class="modes" style="margin-top:22px"><button class="mode" onclick="mixTela()"><b>🎯 Quizzes misturados</b><span>as 3 matérias juntas + auditoria do que você mais errou</span></button>
   <button class="mode" ${erros.length?'':'disabled style="opacity:.45"'} onclick="revErros()"><b>🔁 Revisar meus erros</b><span>${erros.length} questões que você errou</span></button>
   <button class="mode" onclick="if(confirm('Apagar todo o progresso?')){S={};save();home()}"><b>🧹 Zerar progresso</b><span>começar do zero</span></button></div>`;
 }
@@ -153,7 +154,7 @@ function abreSim(k){const x=SIMS[k];SIMA=k;
   <div class="dl" style="margin-bottom:6px">${dlink('s'+x.n+'p','Simulado '+x.n+' - Prova')}${dlink('s'+x.n+'g','Simulado '+x.n+' - Gabarito comentado')}</div>`;
   x.casos.forEach(c=>{h+=`<div class="caso"><h3>${esc(c.titulo)}</h3>${c.texto.map(([t,v])=>`<p>${t?`<b>${esc(t)}:</b> `:''}${esc(v)}</p>`).join('')}</div>`;
     c.questoes.forEach(q=>{h+=`<div class="card qcard q" id="q${q.n}"><span class="qtipo" style="background:${q.tipo==='obj'?'#60a5fa22;color:#60a5fa':'#a78bfa22;color:#a78bfa'}">${q.tipo==='obj'?'Questão '+String(q.n).padStart(2,'0'):'Discursiva '+String(q.n).padStart(2,'0')}</span>${q.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<div class="enun">${esc(q.enunciado)}</div>`;
-      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(a.comentario)}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span></button>`).join('')}</div>`}
+      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm ${a.correta?'c':''}"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(a.comentario)}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span></button>`).join('')}</div>`}
       else{h+=q.itens.map((it,j)=>`<div style="margin:10px 0"><div><b>${it.letra?it.letra+') ':''}</b>${esc(it.texto)} ${it.pontos?`<span class="sub">(${it.pontos})</span>`:''}</div><div id="r${q.n}_${j}" class="hide resp" style="margin-top:8px">${esc(it.resposta)}${it.nota?`<span class="nota">${esc(it.nota)}</span>`:''}</div></div>`).join('')+`<div class="foot"><span></span><button class="btn" onclick="this.remove();document.querySelectorAll('[id^=r${q.n}_]').forEach(e=>e.classList.remove('hide'))">Mostrar resposta-modelo</button></div>`}
       h+='</div>'})});
   h+=`<div class="row" style="justify-content:center;margin:20px 0"><button class="btn" onclick="simulados()">Voltar aos simulados</button></div></div>`;
@@ -162,29 +163,42 @@ function marcaSim(x,n,j){const q=achaQ(x,n);const c=q.alts.findIndex(a=>a.corret
 function respSim(n,j){const x=SIMS[SIMA];const ok=marcaSim(x,n,j);const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');st[n]=ok;localStorage.setItem('sim_'+x.n,JSON.stringify(st));const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');sv[n]=j;localStorage.setItem('simr_'+x.n,JSON.stringify(sv));placar()}
 function placar(){const x=SIMS[SIMA];const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');const t=x.casos.flatMap(c=>c.questoes).filter(q=>q.tipo==='obj').length;const f=Object.keys(st).length,o=Object.values(st).filter(v=>v).length;const e=$('#placar');if(e)e.textContent=`Objetivas: ${f}/${t} respondidas · ${o} certas${f?` (${Math.round(o/f*100)}%)`:''}`}
 
+
+function cmt(t,ok){t=String(t).replace(/^\s*(CORRETA|ERRADA|INCORRETA)[.:]?\s*/i,'');const h=esc(t).replace(/(^|[^A-Za-zÀ-ÿ0-9])([A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ0-9+]{2,})(?![A-Za-zÀ-ÿ0-9])/g,'$1<mark>$2</mark>');
+  return `<span class="cm ${ok?'c':''}"><span class="rot">${ok?'✔ CORRETA, PORQUE':'✘ ERRADA, PORQUE'}</span>${h}</span>`}
+function hs(str){let h=1779033703;for(const ch of String(str))h=Math.imul(h^ch.charCodeAt(0),3432918353),h=h<<13|h>>>19;return h>>>0}
+function rshuf(a,seed){let x=hs(seed);const r=()=>{x|=0;x=x+0x6D2B79F5|0;let t=Math.imul(x^x>>>15,1|x);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function mixes(mat){const pool=(mat?todas(mat):Object.keys(DATA).flatMap(todas)).filter(x=>x.q.t!=='ed');
+  const gs=(mat?DATA[mat].aulas.map(a=>pool.filter(x=>x.a===a.n)):Object.keys(DATA).map(m=>pool.filter(x=>x.m===m))).map((g,k)=>rshuf(g,'mix'+(mat||'g')+k));
+  const fila=[];for(let i=0;gs.some(g=>i<g.length);i++)gs.forEach(g=>{if(i<g.length)fila.push(g[i])});
+  const n=Math.max(1,Math.round(fila.length/30)),tam=Math.ceil(fila.length/n),out=[];for(let k=0;k<n;k++)out.push(rshuf(fila.slice(k*tam,(k+1)*tam),'ord'+(mat||'g')+k));return out}
+function mixBotoes(mat){return mixes(mat).map((l,k)=>{const key=(mat||'geral')+'_'+(k+1),sc=localStorage.getItem('mix_'+key);
+  return `<button class="mode" onclick="abreMix('${mat||''}',${k})"><b>🎯 Quiz misturado ${k+1}</b><span>${l.length} questões${sc?` · você fez: ${sc}`:''}</span></button>`}).join('')}
+function abreMix(mat,k){const l=mixes(mat||null)[k];iniciar(l,`Quiz misturado ${k+1}`+(mat?' · '+DATA[mat].nome:''),(mat||'geral')+'_'+(k+1))}
+function mixTela(){app.innerHTML=head('Quizzes misturados <span>3 matérias</span>','home()')+`<p class="sub" style="margin:-12px 0 16px">Questões das 3 matérias, com auditoria dos erros no final. O Quiz 1 é igual para todo mundo, então dá pra comparar com os amigos.</p><div class="modes">${mixBotoes(null)}</div>`;scrollTo(0,0)}
 function revErros(m){const all=(m?todas(m):Object.keys(DATA).flatMap(todas)).filter(x=>S[qid(x.m,x.a,x.i)]&&!S[qid(x.m,x.a,x.i)].ok);if(all.length)iniciar(shuffle(all),'Revisão de erros')}
 function materia(m){
   const d=DATA[m]; const s=stats(todas(m));
   app.innerHTML=head(d.nome,'home()')+
-  `<button class="btn pri" style="width:100%;margin:0 0 16px;padding:14px;font-size:15.5px" onclick="misturado('${m}')">🎯 Quiz misturado de ${esc(d.nome)} · 30 questões + auditoria dos erros</button>
+  `<div class="card" style="margin-bottom:16px;border-color:rgba(255,122,98,.45);background:linear-gradient(140deg,rgba(255,138,92,.14),rgba(155,123,255,.10))"><b style="font-size:17px">🎯 Quizzes misturados de ${esc(d.nome)}</b><p class="sub" style="margin:4px 0 10px">Todas as aulas misturadas, com auditoria do que você mais errou no final. Iguais para todo mundo: o Quiz 1 do seu amigo é o mesmo que o seu.</p><div class="modes" style="margin:0">${mixBotoes(m)}</div></div>
   <div class="modes">
    <button class="mode" onclick="revErros('${m}')"><b>🔁 Revisar erros</b><span>só o que você errou aqui</span></button>
    <button class="mode" onclick="iniciar(todas('${m}').filter(x=>x.q.t==='ed'),'Estudos dirigidos · ${esc(d.nome)}')" ${todas(m).some(x=>x.q.t==='ed')?'':'disabled style="opacity:.45"'}><b>📝 Estudos dirigidos</b><span>${todas(m).filter(x=>x.q.t==='ed').length} perguntas do ED</span></button></div>
-  <div class="grid" style="grid-template-columns:1fr">${d.aulas.map(a=>{const l=todas(m).filter(x=>x.a===a.n);const t=stats(l);return `<button class="card aula" onclick="iniciar(todas('${m}').filter(x=>x.a===${a.n}),'Aula ${a.n} · ${esc(a.nome)}')"><div class="num" style="background:${d.cor}22;color:${d.cor}">${a.n}</div><div class="info"><b>${esc(a.nome)}</b><span class="sub">${t.tot} questões · ${t.f} feitas</span>${bar(t.f/t.tot*100,d.cor)}</div><div class="score" style="color:${t.f?(t.p>=70?'var(--ok)':'var(--warn)'):'var(--mut)'}">${t.f?t.p+'%':'—'}</div></button>`}).join('')}</div>`;
+  <div class="grid" style="grid-template-columns:1fr">${d.aulas.map(a=>{const l=todas(m).filter(x=>x.a===a.n);const t=stats(l);return `<button class="card aula" onclick="iniciar(rshuf(todas('${m}').filter(x=>x.a===${a.n}),'aula${m}${a.n}'),'Aula ${a.n} · ${esc(a.nome)}')"><div class="num" style="background:${d.cor}22;color:${d.cor}">${a.n}</div><div class="info"><b>${esc(a.nome)}</b><span class="sub">${t.tot} questões · ${t.f} feitas</span>${bar(t.f/t.tot*100,d.cor)}</div><div class="score" style="color:${t.f?(t.p>=70?'var(--ok)':'var(--warn)'):'var(--mut)'}">${t.f?t.p+'%':'—'}</div></button>`}).join('')}</div>`;
 }
 var R=null; // rodada
-function iniciar(lista,titulo){if(!lista.length)return;R={lista,titulo,i:0,res:[],volta:location.hash};mostra();scrollTo(0,0)}
+function iniciar(lista,titulo,key){if(!lista.length)return;R={lista,titulo,key,i:0,res:[],volta:location.hash};mostra();scrollTo(0,0)}
 function mostra(){
   const x=R.lista[R.i],q=x.q,[tn,tc]=TIPO[q.t]||TIPO.mc,d=DATA[x.m];
   const alts=q.t==='ed'?`<textarea id="ta" placeholder="Escreva (ou pense) sua resposta e depois revele a resposta-modelo..."></textarea><div class="foot"><span></span><button class="btn pri" onclick="revela()">Mostrar resposta</button></div>`:
-   `<div class="alts">${q.a.map((a,j)=>`<button class="alt" id="a${j}" onclick="responde(${j})"><span class="l">${q.t==='vf'?(j?'F':'V'):L[j]}</span><span class="tx">${esc(a)}${q.k&&q.k[j]?`<span class="cm">${j===q.c?'✔ ':'✘ '}${esc(q.k[j])}</span>`:''}</span></button>`).join('')}</div>`;
+   `<div class="alts">${q.a.map((a,j)=>`<button class="alt" id="a${j}" onclick="responde(${j})"><span class="l">${q.t==='vf'?(j?'F':'V'):L[j]}</span><span class="tx">${esc(a)}${q.k&&q.k[j]?cmt(q.k[j],j===q.c):''}</span></button>`).join('')}</div>`;
   app.innerHTML=head(esc(R.titulo),'sair()')+
   `<div class="qtop"><span class="sub">Questão ${R.i+1} de ${R.lista.length}</span><span class="chip">${esc(d.nome)} · Aula ${x.a}</span></div><div class="prog"><i style="width:${R.i/R.lista.length*100}%"></i></div>
   <div class="card qcard"><span class="qtipo" style="background:${tc}22;color:${tc}">${tn}${q.t==='ed'&&q.d?' · '+q.d:''}</span>
   ${q.i?`<div class="qimg"><img src="${IMGS[q.i].startsWith('img/')?IMGS[q.i]:'data:image/jpeg;base64,'+IMGS[q.i]}" loading="lazy" decoding="async" onclick="zoom(this.src)"></div>`:''}
   <div class="enun">${esc(q.e)}</div>${alts}<div id="exp"></div></div>`;
 }
-function exp(q,x){return `<div class="exp"><h4>${q.t==='ed'?'Resposta-modelo':'Para guardar'}</h4>${q.t==='ed'?`<div class="resp">${esc(q.r)}</div>`:''}${q.x?`<p style="margin-top:${q.t==='ed'?8:0}px">💡 ${esc(q.x)}</p>`:''}<div class="src">📍 ${q.s?'Slide '+q.s+' · ':''}Aula ${x.a} · ${esc(x.aula)}${q.g?' · '+esc(q.g):''}</div></div>`}
+function exp(q,x){return `<div class="exp"><h4>${q.t==='ed'?'Resposta-modelo':'Para guardar'}</h4>${q.t==='ed'?`<div class="resp">${esc(q.r)}</div>`:''}${q.x?`<p style="margin-top:${q.t==='ed'?8:0}px">💡 ${esc(q.x)}</p>`:''}<div class="src">📍 Aula ${x.a} · ${esc(x.aula)}${q.g?' · '+esc(q.g):''}</div></div>`}
 function responde(j){
   const x=R.lista[R.i],q=x.q,ok=j===q.c;
   q.a.forEach((_,k)=>{const b=$('#a'+k);b.disabled=true;b.classList.add('show');if(k===q.c)b.classList.add('ok');else if(k===j)b.classList.add('err')});
@@ -197,7 +211,7 @@ function prox(){return `<div class="foot"><span></span><button class="btn pri" o
 function avanca(){R.i++;if(R.i<R.lista.length){mostra();scrollTo(0,0)}else fim()}
 function sair(){if(!R.res.length||confirm('Sair desta rodada? O que você já respondeu fica salvo.'))home()}
 function fim(){
-  const ok=R.res.filter(r=>r.ok).length,t=R.res.length,p=t?Math.round(ok/t*100):0,cor=p>=70?'var(--ok)':p>=50?'var(--warn)':'var(--err)';
+  const ok=R.res.filter(r=>r.ok).length,t=R.res.length;if(R.key)try{localStorage.setItem('mix_'+R.key,ok+'/'+t+' certas')}catch(e){}const p=t?Math.round(ok/t*100):0,cor=p>=70?'var(--ok)':p>=50?'var(--warn)':'var(--err)';
   const msg=p>=85?'Excelente! Domínio muito bom.':p>=70?'Bom resultado. Revise os erros para fechar.':p>=50?'No caminho. Vale rever as aulas dos erros.':'Hora de reassistir as aulas e tentar de novo.';
   app.innerHTML=head(esc(R.titulo),'home()')+`<div class="card res"><div class="ring" style="background:conic-gradient(${cor} ${p*3.6}deg,rgba(255,255,255,.08) 0)"><div>${p}%</div></div><h2>${ok} de ${t} certas</h2><p class="sub" style="margin-top:6px">${msg}</p>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn" onclick="home()">Início</button>${t-ok?'<button class="btn pri" onclick="refazErros()">Refazer as erradas</button>':''}</div>
