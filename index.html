@@ -27,6 +27,10 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 .aud .as .pc{font-weight:800;white-space:nowrap}.aud .as .tm{font-size:12.5px;color:var(--mut);margin:6px 0 8px}
 .aud .as .btn{padding:8px 12px;font-size:13.5px}.aud .top{border-color:rgba(248,113,113,.55);background:rgba(248,113,113,.08)}
 .aud .selo-top{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;color:#fca5a5;margin-bottom:4px}
+
+.vbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;padding:12px 14px;border-radius:14px;border:1.5px solid rgba(255,122,98,.5);background:linear-gradient(135deg,rgba(255,138,92,.16),rgba(155,123,255,.14));color:var(--tx);text-align:left;cursor:pointer}
+.vbtn .pl{flex:0 0 40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--g);color:#fff;font-size:16px}.vbtn b{display:block;font-size:15px}.vbtn .sub{display:block;font-size:12.5px}
+.vwrap{margin-top:14px;border-radius:14px;overflow:hidden;background:#000}.vwrap video{width:100%;display:block;aspect-ratio:16/9}
 @media(max-width:560px){.hero h1{font-size:23px;max-width:78%}.hero p{max-width:100%}.hero .selo{width:130px;height:130px;right:-30px;top:-30px}}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wrap{max-width:980px;margin:0 auto;padding:22px 18px 90px}
@@ -108,7 +112,7 @@ textarea{width:100%;min-height:110px;padding:14px;border-radius:14px;background:
 @media(max-width:560px){.enun{font-size:16.5px}.qcard{padding:16px}.wrap{padding:16px 12px 90px}header h1{font-size:19px}}
 </style></head><body><div class="wrap" id="app"><div style="min-height:80vh;display:grid;place-items:center;text-align:center;color:#a59cba;font:600 15px system-ui,sans-serif"><div><div style="width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#ff8a5c,#f0567a 55%,#9b7bff);animation:gira 1.2s linear infinite"></div>Savin Aprova<br><span style="font-weight:400;font-size:13px">carregando o quiz…</span></div></div></div>
 <script>window.onerror=function(m,u,l){var a=document.getElementById('app');if(a&&!window.__ok)a.innerHTML='<div style="padding:24px;color:#f5f1fa;font:15px sans-serif">Não abriu neste navegador.<br><br><small style="color:#a59cba">Erro: '+String(m).replace(/</g,'&lt;')+' (linha '+l+')</small><br><br><button onclick="try{localStorage.clear()}catch(e){};location.reload()" style="padding:10px 14px;border-radius:10px;border:0;background:#f0567a;color:#fff">Limpar e tentar de novo</button></div>'};</script>
-<script src="dados.js?v=b7794040"></script><script>
+<script src="dados.js?v=ae618d37"></script><script>
 
 const TIPO={mc:['Múltipla escolha','#60a5fa'],vf:['Verdadeiro ou falso','#fbbf24'],img:['Figura / lâmina','#f472b6'],caso:['Caso clínico','#34d399'],ed:['Estudo dirigido','#a78bfa']};
 const L='ABCDEFGH';
@@ -141,6 +145,10 @@ function home(){
 }
 const AREA=a=>{const x=(a||'').toLowerCase();return x.startsWith('hist')?'a-hist':x.startsWith('emb')?'a-emb':x.startsWith('fis')?'a-fis':x.startsWith('bio')?'a-bio':x.startsWith('neuro')?'a-neu':'a-ana'};
 function dlink(k,nome){return PDFS[k]?(PDFS[k].startsWith('pdf/')?`<a href="${PDFS[k]}" target="_blank" rel="noopener">`:`<a download="${esc(nome)}.pdf" href="data:application/pdf;base64,${PDFS[k]}">`)+`⬇ Baixar ${esc(nome.split(' - ').slice(1).join(' - '))} (PDF)</a>`:''}
+
+function vbtn(x,k,rot){const v=(x.n===1&&typeof VIDS!=='undefined')?VIDS[k]:null;if(!v)return'';const m=Math.floor(v.seg/60),ss=String(v.seg%60).padStart(2,'0');
+  return `<button class="vbtn" onclick="tocaV(this,'${v.arq}')"><span class="pl">▶</span><span><b>${rot}</b><span class="sub">Ana e Léo · ${m}:${ss}</span></span></button>`}
+function tocaV(b,src){const d=document.createElement('div');d.className='vwrap';d.innerHTML=`<video controls autoplay playsinline preload="metadata" src="${src}"></video>`;b.replaceWith(d)}
 function simulados(){
   app.innerHTML=head('Simulados <span>no formato da PR2</span>','home()')+`<p class="sub" style="margin:-12px 0 16px">Casos clínicos com alternativas de Histologia, Embriologia, Fisiologia/Bioquímica e Anatomia. Faça online ou baixe a prova e o gabarito comentado em PDF.</p>`+
   `<div class="grid" style="grid-template-columns:1fr">${SIMS.map((x,k)=>{const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');const f=Object.keys(st).length,o=Object.values(st).filter(v=>v).length;
@@ -152,14 +160,14 @@ function achaQ(x,n){return x.casos.flatMap(c=>c.questoes).find(q=>q.n===n)}
 function abreSim(k){const x=SIMS[k];SIMA=k;
   let h=head(esc(x.titulo),'simulados()')+`<div class="sim">${x.aviso?`<p class="sub" style="margin-bottom:10px">${esc(x.aviso)}</p>`:''}<div class="scorebar"><span class="sub" id="placar"></span><button class="btn" onclick="if(confirm('Zerar suas respostas deste simulado?')){localStorage.removeItem('sim_${x.n}');localStorage.removeItem('simr_${x.n}');abreSim(${k})}">Refazer</button></div>
   <div class="dl" style="margin-bottom:6px">${dlink('s'+x.n+'p','Simulado '+x.n+' - Prova')}${dlink('s'+x.n+'g','Simulado '+x.n+' - Gabarito comentado')}</div>`;
-  x.casos.forEach(c=>{h+=`<div class="caso"><h3>${esc(c.titulo)}</h3>${c.texto.map(([t,v])=>`<p>${t?`<b>${esc(t)}:</b> `:''}${esc(v)}</p>`).join('')}</div>`;
+  x.casos.forEach((c,ci)=>{h+=`<div class="caso"><h3>${esc(c.titulo)}</h3>${c.texto.map(([t,v])=>`<p>${t?`<b>${esc(t)}:</b> `:''}${esc(v)}</p>`).join('')}${vbtn(x,'c'+(ci+1),'Caso explicado em vídeo')}</div>`;
     c.questoes.forEach(q=>{h+=`<div class="card qcard q" id="q${q.n}"><span class="qtipo" style="background:${q.tipo==='obj'?'#60a5fa22;color:#60a5fa':'#a78bfa22;color:#a78bfa'}">${q.tipo==='obj'?'Questão '+String(q.n).padStart(2,'0'):'Discursiva '+String(q.n).padStart(2,'0')}</span>${q.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<div class="enun">${esc(q.enunciado)}</div>`;
-      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm ${a.correta?'c':''}"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(a.comentario)}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span></button>`).join('')}</div>`}
-      else{h+=q.itens.map((it,j)=>`<div style="margin:10px 0"><div><b>${it.letra?it.letra+') ':''}</b>${esc(it.texto)} ${it.pontos?`<span class="sub">(${it.pontos})</span>`:''}</div><div id="r${q.n}_${j}" class="hide resp" style="margin-top:8px">${esc(it.resposta)}${it.nota?`<span class="nota">${esc(it.nota)}</span>`:''}</div></div>`).join('')+`<div class="foot"><span></span><button class="btn" onclick="this.remove();document.querySelectorAll('[id^=r${q.n}_]').forEach(e=>e.classList.remove('hide'))">Mostrar resposta-modelo</button></div>`}
-      h+='</div>'})});
+      if(q.tipo==='obj'){h+=`<div class="alts">${q.alts.map((a,j)=>`<button class="alt" id="q${q.n}a${j}" onclick="respSim(${q.n},${j})"><span class="l">${'abcd'[j]}</span><span class="tx">${esc(a.texto)}${a.reconstrucao?' <span class="rec">[reconstrução]</span>':''}<span class="cm ${a.correta?'c':''}"><span class="area ${AREA(a.area)}">${esc(a.area)}</span>${a.correta?'✔ CORRETA. ':'✘ ERRADA. '}${esc(String(a.comentario||'').replace(/^\s*(Correta|Errada|Incorreta)[.:,]?\s*/i,''))}${a.nota?`<span class="nota">${esc(a.nota)}</span>`:''}</span></span></button>`).join('')}</div>`}
+      else{h+=q.itens.map((it,j)=>`<div style="margin:10px 0"><div><b>${it.letra?it.letra+') ':''}</b>${esc(it.texto)} ${it.pontos?`<span class="sub">(${it.pontos})</span>`:''}</div><div id="r${q.n}_${j}" class="hide resp" style="margin-top:8px">${esc(it.resposta)}${it.nota?`<span class="nota">${esc(it.nota)}</span>`:''}</div></div>`).join('')+`<div class="foot"><span></span><button class="btn" onclick="this.remove();document.querySelectorAll('[id^=r${q.n}_],#vb${q.n}').forEach(e=>e.classList.remove('hide'))">Mostrar resposta-modelo</button></div>`}
+      h+=`<div class="vbox hide" id="vb${q.n}">${vbtn(x,'q'+q.n,'Gabarito comentado em vídeo')}</div></div>`})});
   h+=`<div class="row" style="justify-content:center;margin:20px 0"><button class="btn" onclick="simulados()">Voltar aos simulados</button></div></div>`;
   app.innerHTML=h;const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');Object.entries(sv).forEach(([n,j])=>marcaSim(x,+n,j));placar();scrollTo(0,0)}
-function marcaSim(x,n,j){const q=achaQ(x,n);const c=q.alts.findIndex(a=>a.correta);q.alts.forEach((_,k)=>{const b=$(`#q${n}a${k}`);if(!b)return;b.disabled=true;b.classList.add('show');if(k===c)b.classList.add('ok');else if(k===j)b.classList.add('err')});return j===c}
+function marcaSim(x,n,j){const vb=$('#vb'+n);if(vb)vb.classList.remove('hide');const q=achaQ(x,n);const c=q.alts.findIndex(a=>a.correta);q.alts.forEach((_,k)=>{const b=$(`#q${n}a${k}`);if(!b)return;b.disabled=true;b.classList.add('show');if(k===c)b.classList.add('ok');else if(k===j)b.classList.add('err')});return j===c}
 function respSim(n,j){const x=SIMS[SIMA];const ok=marcaSim(x,n,j);const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');st[n]=ok;localStorage.setItem('sim_'+x.n,JSON.stringify(st));const sv=JSON.parse(localStorage.getItem('simr_'+x.n)||'{}');sv[n]=j;localStorage.setItem('simr_'+x.n,JSON.stringify(sv));placar()}
 function placar(){const x=SIMS[SIMA];const st=JSON.parse(localStorage.getItem('sim_'+x.n)||'{}');const t=x.casos.flatMap(c=>c.questoes).filter(q=>q.tipo==='obj').length;const f=Object.keys(st).length,o=Object.values(st).filter(v=>v).length;const e=$('#placar');if(e)e.textContent=`Objetivas: ${f}/${t} respondidas · ${o} certas${f?` (${Math.round(o/f*100)}%)`:''}`}
 
