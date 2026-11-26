@@ -166,7 +166,8 @@ function revErros(m){const all=(m?todas(m):Object.keys(DATA).flatMap(todas)).fil
 function materia(m){
   const d=DATA[m]; const s=stats(todas(m));
   app.innerHTML=head(d.nome,'home()')+
-  `<div class="modes"><button class="mode" onclick="iniciar(shuffle(todas('${m}')).slice(0,30),'Simulado · ${esc(d.nome)}')"><b>🎯 Simulado da matéria</b><span>30 questões de todas as aulas</span></button>
+  `<button class="btn pri" style="width:100%;margin:0 0 16px;padding:14px;font-size:15.5px" onclick="misturado('${m}')">🎯 Quiz misturado de ${esc(d.nome)} · 30 questões + auditoria dos erros</button>
+  <div class="modes">
    <button class="mode" onclick="revErros('${m}')"><b>🔁 Revisar erros</b><span>só o que você errou aqui</span></button>
    <button class="mode" onclick="iniciar(todas('${m}').filter(x=>x.q.t==='ed'),'Estudos dirigidos · ${esc(d.nome)}')" ${todas(m).some(x=>x.q.t==='ed')?'':'disabled style="opacity:.45"'}><b>📝 Estudos dirigidos</b><span>${todas(m).filter(x=>x.q.t==='ed').length} perguntas do ED</span></button></div>
   <div class="grid" style="grid-template-columns:1fr">${d.aulas.map(a=>{const l=todas(m).filter(x=>x.a===a.n);const t=stats(l);return `<button class="card aula" onclick="iniciar(todas('${m}').filter(x=>x.a===${a.n}),'Aula ${a.n} · ${esc(a.nome)}')"><div class="num" style="background:${d.cor}22;color:${d.cor}">${a.n}</div><div class="info"><b>${esc(a.nome)}</b><span class="sub">${t.tot} questões · ${t.f} feitas</span>${bar(t.f/t.tot*100,d.cor)}</div><div class="score" style="color:${t.f?(t.p>=70?'var(--ok)':'var(--warn)'):'var(--mut)'}">${t.f?t.p+'%':'—'}</div></button>`}).join('')}</div>`;
@@ -203,8 +204,10 @@ function fim(){
   ${auditoria()}<h3 style="font-size:16px;margin:20px 0 0;text-align:left">Questão por questão</h3><div class="list">${R.res.map((r,k)=>`<div class="li" onclick="this.querySelector('.det').classList.toggle('hide')"><span class="d" style="background:${r.ok?'var(--ok)':'var(--err)'}"></span><div><div>${k+1}. ${esc(r.x.q.e.slice(0,140))}${r.x.q.e.length>140?'…':''}</div><div class="det hide" style="margin-top:6px">${r.x.q.t!=='ed'?`<b style="color:var(--ok)">${L[r.x.q.c]}) ${esc(r.x.q.a[r.x.q.c])}</b><br>${(r.x.q.k||[]).map((c,j)=>`<span class="sub">${L[j]}: ${esc(c)}</span>`).join('<br>')}<br>`:''}<span class="sub">${esc(r.x.q.x||r.x.q.r||'')}</span></div></div></div>`).join('')}</div></div>`;scrollTo(0,0);
 }
 
-function misturado(){const ms=Object.keys(DATA),por=Math.floor(30/ms.length);let l=[];ms.forEach(m=>{l=l.concat(shuffle(todas(m).filter(x=>x.q.t!=='ed')).slice(0,por))});
-  const resto=shuffle(Object.keys(DATA).flatMap(todas).filter(x=>x.q.t!=='ed'&&!l.includes(x)));l=l.concat(resto.slice(0,30-l.length));iniciar(shuffle(l),'Quiz misturado')}
+function misturado(mat){const pool=(mat?todas(mat):Object.keys(DATA).flatMap(todas)).filter(x=>x.q.t!=='ed');
+  const grupos=mat?DATA[mat].aulas.map(a=>pool.filter(x=>x.a===a.n)):Object.keys(DATA).map(m=>pool.filter(x=>x.m===m));const por=Math.floor(30/grupos.length);let l=[];
+  grupos.forEach(g=>{l=l.concat(shuffle(g).slice(0,por))});l=l.concat(shuffle(pool.filter(x=>!l.includes(x))).slice(0,30-l.length));
+  iniciar(shuffle(l),mat?'Quiz misturado · '+DATA[mat].nome:'Quiz misturado')}
 function treino(m,a){const l=todas(m).filter(x=>x.a===a&&x.q.t!=='ed');const st=x=>{const v=S[qid(x.m,x.a,x.i)];return v?(v.ok?2:0):1};
   return shuffle(l).sort((p,q)=>st(p)-st(q)).slice(0,30)}
 function treinaAula(m,a){const au=DATA[m].aulas.find(z=>z.n===a);iniciar(shuffle(treino(m,a)),'Treino · '+au.nome)}
@@ -217,7 +220,7 @@ function auditoria(){
   const M={};R.res.forEach(r=>{const m=r.x.m;(M[m]=M[m]||{t:0,o:0});M[m].t++;if(r.ok)M[m].o++});
   const err=AUD.filter(g=>g.e);
   return `<div class="aud"><h3>🔎 Auditoria do seu quiz</h3><p class="sub">${err.length?'Onde você mais errou, do pior para o melhor. Toque em treinar para fazer um quiz só daquele assunto.':'Você não errou nenhuma. Domínio em todos os assuntos que caíram.'}</p>
-  <div class="mats">${Object.entries(M).map(([m,v])=>{const p=Math.round(v.o/v.t*100);return `<div><b style="color:${p>=70?'var(--ok)':p>=50?'var(--warn)':'var(--err)'}">${p}%</b><span>${esc(DATA[m].nome.split(' ')[0])} · ${v.o}/${v.t}</span></div>`}).join('')}</div>
+  ${Object.keys(M).length<2?'':`<div class="mats">${Object.entries(M).map(([m,v])=>{const p=Math.round(v.o/v.t*100);return `<div><b style="color:${p>=70?'var(--ok)':p>=50?'var(--warn)':'var(--err)'}">${p}%</b><span>${esc(DATA[m].nome.split(' ')[0])} · ${v.o}/${v.t}</span></div>`}).join('')}</div>`}
   ${err.length>1?`<button class="btn pri" style="width:100%;margin-bottom:6px" onclick="treinaFraco()">🎯 Quiz do que eu preciso estudar (30 questões dos assuntos que errei)</button>`:''}
   ${AUD.map((g,k)=>{const p=Math.round((g.t-g.e)/g.t*100),d=DATA[g.m];return `<div class="as ${k===0&&g.e?'top':''}">${k===0&&g.e?'<span class="selo-top">MAIS ERROU</span>':''}<div class="t"><b><span style="color:${d.cor}">●</span> ${esc(g.nome)}</b><span class="pc" style="color:${g.e?(p>=50?'var(--warn)':'var(--err)'):'var(--ok)'}">${g.e?`errou ${g.e} de ${g.t}`:`${g.t}/${g.t} certas`}</span></div>
    <div class="tm">${esc(d.nome)} · Aula ${g.a}${g.temas.length?' · errou em: '+g.temas.map(esc).join(', '):''}</div>${bar(p,g.e?(p>=50?'var(--warn)':'var(--err)'):'var(--ok)')}
